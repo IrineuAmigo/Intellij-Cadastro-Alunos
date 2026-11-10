@@ -1,0 +1,243 @@
+/* ==========================================================================
+   ESTILIZAÇÃO GERAL E VARIÁVEIS DO SISTEMA DE CADASTRO DE ALUNOS
+   ========================================================================== */
+
+:root {
+    --primary-bg: #f4f6f9;
+    --card-bg: #ffffff;
+    --text-color: #2c3e50;
+    --border-color: #e2e8f0;
+
+    /* CORES SEMÂNTICAS DOS BOTÕES E VERBOS HTTP */
+    --color-create: #28a745;        /* Verde -> Criar (POST) */
+    --color-create-hover: #218838;
+
+    --color-search: #17a2b8;        /* Azul / Ciano -> Buscar (GET) */
+    --color-search-hover: #138496;
+
+    --color-update: #fd7e14;        /* Laranja -> Atualizar (PUT) */
+    --color-update-hover: #e06908;
+
+    --color-delete: #dc3545;        /* Vermelho -> Deletar (DELETE) */
+    --color-delete-hover: #c82333;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 30px 20px;
+}
+
+/* ==========================================================================
+   CABEÇALHO DA PÁGINA ACADÊMICA
+   ========================================================================== */
+.main-header {
+    text-align: center;
+    margin-bottom: 35px;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.main-header h1 {
+    font-size: 2.2rem;
+    color: #1a365d;
+    margin-bottom: 5px;
+}
+
+.main-header p {
+    color: #718096;
+    font-size: 1.05rem;
+}
+
+/* ==========================================================================
+   LAYOUT EM GRID DOS CARDS DE OPERAÇÃO
+   ========================================================================== */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+    gap: 25px;
+}
+
+@media (max-width: 580px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-top: 5px solid #cbd5e0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+/* Destaque das bordas superiores de acordo com a função */
+.card.border-create { border-top-color: var(--color-create); }
+.card.border-search { border-top-color: var(--color-search); }
+.card.border-update { border-top-color: var(--color-update); }
+.card.border-delete { border-top-color: var(--color-delete); }
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h2 {
+    font-size: 1.35rem;
+    color: #2d3748;
+}
+
+/* Badges estilizados identificando os Verbos HTTP */
+.badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge-create { background-color: var(--color-create); }
+.badge-search { background-color: var(--color-search); }
+.badge-update { background-color: var(--color-update); }
+.badge-delete { background-color: var(--color-delete); }
+
+/* ==========================================================================
+   ESTILIZAÇÃO DE FORMULÁRIOS E INPUTS
+   ========================================================================== */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #4a5568;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+/* ==========================================================================
+   ESTILIZAÇÃO DOS BOTÕES (CORES CONFORME A FUNÇÃO SOLICITADA)
+   ========================================================================== */
+.btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:active {
+    transform: scale(0.99);
+}
+
+/* Botão Criar -> Verde */
+.btn-create {
+    background-color: var(--color-create);
+}
+.btn-create:hover {
+    background-color: var(--color-create-hover);
+}
+
+/* Botão Buscar -> Azul */
+.btn-search {
+    background-color: var(--color-search);
+}
+.btn-search:hover {
+    background-color: var(--color-search-hover);
+}
+
+/* Botão Atualizar -> Laranja */
+.btn-update {
+    background-color: var(--color-update);
+}
+.btn-update:hover {
+    background-color: var(--color-update-hover);
+}
+
+/* Botão Deletar -> Vermelho */
+.btn-delete {
+    background-color: var(--color-delete);
+}
+.btn-delete:hover {
+    background-color: var(--color-delete-hover);
+}
+
+/* ==========================================================================
+   ÁREA DE EXIBIÇÃO DE RESULTADOS DA BUSCA
+   ========================================================================== */
+.result-box {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #edf2f7;
+    border-radius: 6px;
+    border-left: 4px solid var(--color-search);
+}
+
+.result-box.hidden {
+    display: none;
+}
+
+.result-box h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #2d3748;
+}
+
+pre {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    background-color: #2d3748;
+    color: #68d391;
+    padding: 12px;
+    border-radius: 6px;
+}

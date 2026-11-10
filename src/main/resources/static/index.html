@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cadastro de Alunos</title>
+    <!-- Vinculação com a folha de estilos CSS estilizada -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Cabeçalho Principal da Aplicação -->
+<header class="main-header">
+    <h1>Portal de Gestão Acadêmica</h1>
+    <p>Sistema de Cadastro e Gerenciamento de Alunos</p>
+</header>
+
+<!-- Container Principal organizado em Cards de Operações CRUD -->
+<main class="container">
+
+    <!-- CARD 1: CADASTRAR NOVO ALUNO (REQUISIÇÃO POST) -->
+    <section class="card border-create">
+        <div class="card-header">
+            <h2>Criar Aluno</h2>
+            <!-- Badge identificador do Verbo HTTP -->
+            <span class="badge badge-create">POST</span>
+        </div>
+        <form onsubmit="event.preventDefault(); criar();">
+            <div class="form-group">
+                <label for="nome">Nome Completo:</label>
+                <input type="text" id="nome" placeholder="Ex: Maria Silva" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail Acadêmico:</label>
+                <input type="email" id="email" placeholder="Ex: maria@email.com" required>
+            </div>
+            <button type="submit" class="btn btn-create">Salvar Aluno</button>
+        </form>
+    </section>
+
+    <!-- CARD 2: BUSCAR ALUNO POR E-MAIL (REQUISIÇÃO GET) -->
+    <section class="card border-search">
+        <div class="card-header">
+            <h2>Buscar Aluno</h2>
+            <span class="badge badge-search">GET</span>
+        </div>
+        <form onsubmit="event.preventDefault(); buscar();">
+            <div class="form-group">
+                <label for="buscarEmail">E-mail do Aluno:</label>
+                <input type="email" id="buscarEmail" placeholder="Digite o e-mail cadastrado" required>
+            </div>
+            <button type="submit" class="btn btn-search">Buscar Aluno</button>
+        </form>
+
+        <!-- Área reservada para exibição formatada do resultado retornado do servidor -->
+        <div id="containerResultadoBuscar" class="result-box hidden">
+            <h3>Resultado da Busca:</h3>
+            <pre id="resultadoBuscar"></pre>
+        </div>
+    </section>
+
+    <!-- CARD 3: ATUALIZAR ALUNO EXISTENTE (REQUISIÇÃO PUT) -->
+    <section class="card border-update">
+        <div class="card-header">
+            <h2>Atualizar Aluno</h2>
+            <span class="badge badge-update">PUT</span>
+        </div>
+        <form onsubmit="event.preventDefault(); atualizar();">
+            <div class="form-group">
+                <label for="id">ID do Aluno (Obrigatório):</label>
+                <input type="number" id="id" placeholder="Ex: 1" required>
+            </div>
+            <div class="form-group">
+                <label for="novoNome">Novo Nome (Opcional):</label>
+                <input type="text" id="novoNome" placeholder="Deixe em branco para manter o atual">
+            </div>
+            <div class="form-group">
+                <label for="novoEmail">Novo E-mail (Opcional):</label>
+                <input type="email" id="novoEmail" placeholder="Deixe em branco para manter o atual">
+            </div>
+            <button type="submit" class="btn btn-update">Atualizar Dados</button>
+        </form>
+    </section>
+
+    <!-- CARD 4: DELETAR ALUNO POR E-MAIL (REQUISIÇÃO DELETE) -->
+    <section class="card border-delete">
+        <div class="card-header">
+            <h2>Deletar Aluno</h2>
+            <span class="badge badge-delete">DELETE</span>
+        </div>
+        <form onsubmit="event.preventDefault(); deletar();">
+            <div class="form-group">
+                <label for="deletarEmail">E-mail do Aluno:</label>
+                <input type="email" id="deletarEmail" placeholder="Digite o e-mail para remover" required>
+            </div>
+            <button type="submit" class="btn btn-delete">Deletar Aluno</button>
+        </form>
+    </section>
+
+</main>
+
+<!-- ====================================================================
+     LÓGICA JAVASCRIPT E INTEGRAÇÃO COM O BACKEND JAVA SPRING BOOT
+     ==================================================================== -->
+<script>
+    // Rota base mapeada no AlunosController (@RequestMapping("/alunos"))
+    const api = "/alunos";
+
+    /**
+     * 1. FUNÇÃO CRIAR (Operação CREATE / Verbo POST)
+     * Consome o endpoint: POST /alunos
+     * Mapeado no Controller: @PostMapping public ResponseEntity<Alunos> salvarAlunos(@RequestBody Alunos alunos)
+     */
+    async function criar() {
+        // Obtém os valores inseridos pelo usuário nos campos do formulário
+        const nome = document.getElementById("nome").value;
+        const email = document.getElementById("email").value;
+
+        try {
+            // Dispara a requisição HTTP POST assíncrona enviando os dados em formato JSON
+            const resp = await fetch(api, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome, email })
+            });
+
+            if (resp.ok) {
+                const alunoSalvo = await resp.json();
+                alert(`Aluno cadastrado com sucesso! ID gerado: ${alunoSalvo.id}`);
+                // Limpa os campos após a criação com sucesso
+                document.getElementById("nome").value = "";
+                document.getElementById("email").value = "";
+            } else {
+                const erro = await resp.text();
+                alert("Erro ao cadastrar aluno: " + erro);
+            }
+        } catch (err) {
+            console.error("Erro de conexão na requisição POST:", err);
+            alert("Falha na comunicação com o servidor!");
+        }
+    }
+
+    /**
+     * 2. FUNÇÃO BUSCAR (Operação READ / Verbo GET)
+     * Consome o endpoint: GET /alunos?email={email}
+     * Mapeado no Controller: @GetMapping public ResponseEntity<Alunos> buscarAlunosPorEmail(@RequestParam String email)
+     */
+    async function buscar() {
+        const email = document.getElementById("buscarEmail").value;
+        const containerResultado = document.getElementById("containerResultadoBuscar");
+        const campoResultado = document.getElementById("resultadoBuscar");
+
+        try {
+            // Dispara requisição GET enviando o e-mail via Query Parameter
+            const resp = await fetch(`${api}?email=${encodeURIComponent(email)}`);
+
+            if (resp.ok) {
+                const data = await resp.json();
+                // Converte a resposta JSON em texto formatado para ser legível na tela
+                campoResultado.innerText = JSON.stringify(data, null, 2);
+                containerResultado.classList.remove("hidden");
+            } else {
+                campoResultado.innerText = "Nenhum aluno foi encontrado com o e-mail informado.";
+                containerResultado.classList.remove("hidden");
+            }
+        } catch (err) {
+            console.error("Erro de conexão na requisição GET:", err);
+            alert("Falha ao consultar dados do servidor!");
+        }
+    }
+
+    /**
+     * 3. FUNÇÃO ATUALIZAR (Operação UPDATE / Verbo PUT)
+     * Consome o endpoint: PUT /alunos?id={id}
+     * Mapeado no Controller: @PutMapping public ResponseEntity<Alunos> atualizarAlunosPorId(@RequestParam Integer id, @RequestBody Alunos alunos)
+     *
+     * INTEGRADO COM A LÓGICA DO BACKEND JAVA:
+     * O método Java realiza a verificação de nulos:
+     * alunosEntity.setEmail(alunos.getEmail() != null ? alunos.getEmail() : alunosEntity.getEmail());
+     * alunosEntity.setNome(alunos.getNome() != null ? alunos.getNome() : alunosEntity.getNome());
+     *
+     * LÓGICA DO FRONTEND: Se o usuário deixar algum campo em branco, enviamos 'null' no JSON.
+     * Dessa forma, o backend identifica o nulo e preserva a informação que já existia no PostgreSQL!
+     */
+    async function atualizar() {
+        const id = document.getElementById("id").value;
+        const nomeInput = document.getElementById("novoNome").value.trim();
+        const emailInput = document.getElementById("novoEmail").value.trim();
+
+        if (!id) {
+            alert("Por favor, informe o ID do aluno que deseja atualizar.");
+            return;
+        }
+
+        // Tratamento: Converte strings vazias para 'null' para acionar corretamente a lógica ternária do Java
+        const payload = {
+            nome: nomeInput !== "" ? nomeInput : null,
+            email: emailInput !== "" ? emailInput : null
+        };
+
+        try {
+            // Dispara requisição PUT passando o ID como parâmetro da URL e o corpo com as alterações
+            const resp = await fetch(`${api}?id=${encodeURIComponent(id)}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (resp.ok) {
+                const alunoAtualizado = await resp.json();
+                alert(`Aluno ID ${alunoAtualizado.id} atualizado com sucesso!`);
+                // Limpa os campos do formulário de atualização
+                document.getElementById("id").value = "";
+                document.getElementById("novoNome").value = "";
+                document.getElementById("novoEmail").value = "";
+            } else {
+                const erro = await resp.text();
+                alert("Erro ao atualizar aluno: " + erro);
+            }
+        } catch (err) {
+            console.error("Erro de conexão na requisição PUT:", err);
+            alert("Falha na comunicação com o servidor!");
+        }
+    }
+
+    /**
+     * 4. FUNÇÃO DELETAR (Operação DELETE / Verbo DELETE)
+     * Consome o endpoint: DELETE /alunos?email={email}
+     * Mapeado no Controller: @DeleteMapping public ResponseEntity<Void> deletarAlunosPorEmail(@RequestParam String email)
+     */
+    async function deletar() {
+        const email = document.getElementById("deletarEmail").value;
+
+        if (!email) {
+            alert("Informe o e-mail do aluno que deseja deletar.");
+            return;
+        }
+
+        // Confirmação de segurança antes de disparar a exclusão destrutiva
+        if (!confirm(`Confirma a exclusão do aluno com e-mail: ${email}?`)) {
+            return;
+        }
+
+        try {
+            // Dispara a requisição HTTP DELETE com o e-mail como parâmetro na URL
+            const resp = await fetch(`${api}?email=${encodeURIComponent(email)}`, {
+                method: "DELETE"
+            });
+
+            if (resp.ok) {
+                alert("Aluno excluído com sucesso!");
+                document.getElementById("deletarEmail").value = "";
+            } else {
+                alert("Erro ao remover aluno. Verifique se o e-mail está cadastrado.");
+            }
+        } catch (err) {
+            console.error("Erro de conexão na requisição DELETE:", err);
+            alert("Falha na comunicação com o servidor!");
+        }
+    }
+</script>
+</body>
+</html>
